@@ -75,16 +75,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         var scaledImage = Bitmap.createScaledBitmap(
             BitmapFactory.decodeResource
-                (resources,R.drawable.ic_launcher_background),50,100,false)
+                (resources,R.drawable.city_icon),100,100,false)
         
         var shardaCenterIcon = BitmapDescriptorFactory.fromBitmap(scaledImage)
         shardaCenterMarker = mMap.addMarker(
             MarkerOptions().snippet("Sharda Center in Pune")
                 .title("Sharda Center")
-                .icon(shardaCenterIcon)
                 .zIndex(45F)
                 .visible(true)
                 .position(LatLng(18.507,73.8343))
+                .icon(shardaCenterIcon)
         )!!
     }
 
@@ -103,7 +103,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         mMap.uiSettings.isRotateGesturesEnabled = true
         mMap.uiSettings.isZoomGesturesEnabled = true
         mMap.uiSettings.isScrollGesturesEnabledDuringRotateOrZoom = true
-        mMap.uiSettings.setAllGesturesEnabled(true)
+        //mMap.uiSettings.setAllGesturesEnabled(true)
         mMap.uiSettings.isIndoorLevelPickerEnabled = true
     }
 }
