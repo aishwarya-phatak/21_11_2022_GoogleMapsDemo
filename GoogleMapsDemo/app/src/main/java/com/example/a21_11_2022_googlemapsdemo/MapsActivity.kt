@@ -3,18 +3,19 @@ package com.example.a21_11_2022_googlemapsdemo
 import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
+import android.view.View
+import android.widget.Toast
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.maps.model.MarkerOptions
 import com.example.a21_11_2022_googlemapsdemo.databinding.ActivityMapsBinding
-import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.Marker
+import com.google.android.gms.maps.model.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -23,8 +24,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private lateinit var bitcodeMarker: Marker
     private lateinit var shardaCenterMarker : Marker
     private lateinit var puneMarker : Marker
-    private lateinit var mumbaiMarker : Marker
+    private lateinit var naviMumbaiMarker : Marker
 
+    private lateinit var circle: Circle
+    private lateinit var polygon: Polygon
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,11 +55,107 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
         initMapSettings()
         addMarkers()
+        setInfoWindowAdapter()
+        onMarkerDragClickListener()
+        onMarkerClickListener()
+        onInfoWindowClickListener()
+        addShapes()
+        miscellaneous()
 
         // Add a marker in Sydney and move the camera
         val sydney = LatLng(-34.0, 151.0)
         mMap.addMarker(MarkerOptions().position(sydney).title("Marker in Sydney"))
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney))
+    }
+
+    private fun miscellaneous(){
+        mMap.setOnPoiClickListener {
+            Log.e("tag","${it.latLng} --- ${it.name}") }
+
+    }
+
+    @SuppressLint("NewApi")
+    private fun addShapes(){
+
+        circle = mMap.addCircle(
+            CircleOptions()
+                .center(LatLng(19.033,73.0297))
+                .fillColor(Color.argb(90,255,0,0))
+                .radius(2000.0)
+                .strokeColor(Color.GRAY)
+                .strokeWidth(3.0F)
+        )
+
+        polygon = mMap.addPolygon(
+            PolygonOptions()
+                .add(LatLng(19.0332,73.0297))
+                .add(LatLng(19.0948,74.7480))
+                .add(LatLng(17.6806,75.3155))
+                .add(LatLng(16.9902,73.3120))
+                .fillColor(Color.argb(50,0,255,0))
+                .strokeColor(Color.CYAN)
+                .strokeWidth(4.0F)
+        )
+    }
+
+    private fun onInfoWindowClickListener(){
+        mMap.setOnInfoWindowClickListener {
+            Log.e("tag","${it.title}")
+            mt("${it.title} -- ${it.position.longitude} -- ${it.position.latitude}")
+        }
+    }
+
+    private fun onMarkerDragClickListener(){
+        mMap.setOnMarkerDragListener(
+            object : GoogleMap.OnMarkerDragListener{
+                override fun onMarkerDrag(marker: Marker) {
+                    Log.e("tag","${marker.position.longitude} -- ${marker.position.latitude} -- ${marker.title}")
+                    mt("${marker.title} -- ${marker.position.longitude} -- ${marker.position.latitude}")
+                }
+
+                override fun onMarkerDragEnd(marker: Marker) {
+                    Log.e("tag","${marker.position.longitude} -- ${marker.position.latitude} -- ${marker.title}")
+                    mt("${marker.title} -- ${marker.position.longitude} -- ${marker.position.latitude}")
+                }
+
+                override fun onMarkerDragStart(marker: Marker) {
+                    Log.e("tag","${marker.position.longitude} -- ${marker.position.latitude} -- ${marker.title}")
+                    mt("${marker.title} -- ${marker.position.longitude} -- ${marker.position.latitude}")
+                }
+            }
+        )
+    }
+
+    private fun onMarkerClickListener(){
+        mMap.setOnMarkerClickListener(
+            object  : GoogleMap.OnMarkerClickListener{
+                override fun onMarkerClick(marker: Marker): Boolean {
+                    mt("marker clicked -- ${marker.title}")
+                    Log.e("tag","${marker.position.longitude} -- ${marker.position.latitude} -- ${marker.title}")
+                    return true
+                }
+            }
+        )
+    }
+
+    private fun setInfoWindowAdapter(){
+        mMap.setInfoWindowAdapter(MyInfoWindowAdapter())
+    }
+
+    private inner class MyInfoWindowAdapter : GoogleMap.InfoWindowAdapter{
+        override fun getInfoContents(marker: Marker): View? {
+         var infoWindowView = layoutInflater.inflate(R.layout.info_window,null)
+            var infoWindowBinding = com.example.a21_11_2022_googlemapsdemo.
+            databinding.
+            InfoWindowBinding.bind(infoWindowView)
+            infoWindowBinding.txtView1.text = marker.title
+            infoWindowBinding.imgView.setImageResource(R.mipmap.ic_launcher)
+            return infoWindowView
+        }
+
+        override fun getInfoWindow(marker: Marker): View? {
+            return null
+        }
     }
 
     private fun addMarkers(){
@@ -86,6 +185,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .position(LatLng(18.507,73.8343))
                 .icon(shardaCenterIcon)
         )!!
+    }
+
+    private fun mt(text : String){
+        Toast.makeText(this,text,Toast.LENGTH_LONG).show()
     }
 
     @SuppressLint("MissingPermission")
